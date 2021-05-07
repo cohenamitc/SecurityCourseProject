@@ -1,0 +1,56 @@
+{% extends "main_template.html" %}}
+{% block head %} {% endblock %}
+{% block title %}Home Page{% endblock %}
+{% block content %}
+{% macro render_field(field, placeholder=None) %}
+{% if field.errors %}
+<div>
+    {% elif field.flags.error %}
+</div>
+{% else %}
+<div>
+    {% endif %}
+    {% set css_class = 'form-control ' + kwargs.pop('class', '') %}
+    <div class="mb-3">
+        {{ field(class=css_class, placeholder=placeholder, **kwargs) }}
+    </div>
+</div>
+{% endmacro %}
+
+<div>
+    <div>
+        <legend>Sign in</legend>
+        {% with errors = get_flashed_messages(category_filter=["error"]) %}
+        {% if errors %}
+        <div>
+            {% for error in errors %}
+            {{ error }}<br>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        {% if form.errors %}
+        <div>
+            {% for field, error in form.errors.items() %}
+            {% for e in error %}
+            {{ e }}<br>
+            {% endfor %}
+            {% endfor %}
+        </div>
+        {% endif %}
+        <form class="form" method="POST" action="." accept-charset="UTF-8" role="form">
+            {{ form.csrf_token }}
+            {{ render_field(form.current, placeholder="Current Password",
+            autofocus="") }}
+            {{ render_field(form.new_pass, placeholder="New Password") }}
+            {{ render_field(form.new_pass_confirm, placeholder="Confirm New Password") }}
+            <div class="mb-3">
+                <button class="btn btn-danger" type="submit" name="submit">Change Password</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+{% block footer %} {% endblock %}
+{% block endjs %} {% endblock %}
