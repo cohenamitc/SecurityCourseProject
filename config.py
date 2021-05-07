@@ -1,7 +1,7 @@
 import os
 
 # Statement for enabling the development environment
-DEBUG = True
+DEBUG = os.environ.get("FLASK_ENV", "") == "development"
 
 # Define the application directory
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -16,14 +16,14 @@ DATABASE_CONNECT_OPTIONS = {}
 # using 2 per available processor cores - to handle
 # incoming requests using one and performing background
 # operations using the other.
-THREADS_PER_PAGE = 2
+THREADS_PER_PAGE = int(os.environ.get("FLASK_THREADS_PER_PAGE", 2))
 
 # Enable protection agains *Cross-site Request Forgery (CSRF)*
-CSRF_ENABLED = True
+CSRF_ENABLED = int(os.environ.get("FLASK_CSRF_ENABLED", 1)) == 1
 
 # Use a secure, unique and absolutely secret key for
 # signing the data.
-CSRF_SESSION_KEY = "4e60f0bee4e09e57c7f5f143ce24e28294e9dfcc8f79c444"
+CSRF_SESSION_KEY = os.environ["FLASK_CSRF_SESSION_KEY"]
 
 # Secret key for signing cookies
-SECRET_KEY = "4a462e72c1c0060275f6f7d0d53c99b9761b88b4658cb903"
+SECRET_KEY = os.environ["FLASK_SECRET_KEY"]

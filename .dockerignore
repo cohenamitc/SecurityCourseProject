@@ -2,3 +2,4 @@
 *.crt
 .idea/
 *.db
+local_*
