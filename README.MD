@@ -7,7 +7,7 @@ $ docker build . -t communication_ltd:latest
 
 ### Docker Run
 ```buildoutcfg
-$ docker run -p 5000:5000 -p 2222:2222 communication_ltd:latest --name "communication_ltd_web"
+$ docker run -p 5000:5000 -p 2222:2222 --name "communication_ltd_web" communication_ltd:latest
 ```
 
 ### Docker stop
