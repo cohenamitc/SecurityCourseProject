@@ -31,3 +31,12 @@ class ChangePasswordForm(Form):
     # TODO:insert password complexity validator here
     new_pass = PasswordField('New Password', [DataRequired(message=REQ_FIELD_MSG)])
     new_pass_confirm = PasswordField('Confirm New Password', [DataRequired(message=REQ_FIELD_MSG), EqualTo('new_pass')])
+
+
+class ForgotPassword(Form):
+    email = StringField('Email Address', [Email(), DataRequired(message=REQ_FIELD_MSG)])
+
+
+class ResetPasswordForm(Form):
+    password = PasswordField('Password', [DataRequired(message=REQ_FIELD_MSG)])
+    password_confirm = PasswordField('Confirm Password', [DataRequired(message=REQ_FIELD_MSG), EqualTo('password')])
