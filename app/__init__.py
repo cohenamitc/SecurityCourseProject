@@ -24,11 +24,17 @@ db = SQLAlchemy(app)
 from app.auth.controllers import auth
 from app.index.controllers import index
 from app.admin_page.controllers import admin_page
+from app.customers.controllers import comm_customers
+from app.plans.controllers import comm_plans
+from app.sectors.controllers import comm_sectors
 
 # Register blueprint(s)
 app.register_blueprint(auth)
 app.register_blueprint(index)
 app.register_blueprint(admin_page)
+app.register_blueprint(comm_customers)
+app.register_blueprint(comm_plans)
+app.register_blueprint(comm_sectors)
 
 # Build the database:
 # This will create the database file using SQLAlchemy

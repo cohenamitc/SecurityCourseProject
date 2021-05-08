@@ -1,5 +1,5 @@
-*.key
-*.crt
+certs/server.key
+certs/server.crt
 .idea/
 *.db
 local_*

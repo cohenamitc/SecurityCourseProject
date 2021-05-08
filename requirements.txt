@@ -4,3 +4,4 @@ flask-wtf
 wtforms
 werkzeug
 email_validator
+pymysql
