@@ -5,6 +5,54 @@
 <h1>
     Manager Page
 </h1>
+{% macro render_field(field, placeholder=None) %}
+{% if field.errors %}
+<div>
+    {% elif field.flags.error %}
+</div>
+{% else %}
+<div>
+    {% endif %}
+    {% set css_class = 'form-control ' + kwargs.pop('class', '') %}
+    <div class="mb-3">
+        {{ field(class=css_class, placeholder=placeholder, **kwargs) }}
+    </div>
+</div>
+{% endmacro %}
+
+<div>
+    <div>
+        <legend>Create Customer</legend>
+        {% with errors = get_flashed_messages(category_filter=["error"]) %}
+        {% if errors %}
+        <div>
+            {% for error in errors %}
+            {{ error }}<br>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        {% if customer_form.errors %}
+        <div>
+            {% for field, error in customer_form.errors.items() %}
+            {% for e in error %}
+            <div class="alert alert-danger" role="alert">
+              {{ e }}
+            </div>
+            {% endfor %}
+            {% endfor %}
+        </div>
+        {% endif %}
+        <form class="form" method="POST" action="." accept-charset="UTF-8" role="form">
+            {{ customer_form.csrf_token }}
+            {{ render_field(customer_form.name, placeholder="Customer Name")}}
+            {{ render_field(customer_form.contact, placeholder="Contact Name")}}
+            {{ render_field(customer_form.phone, placeholder="Contact Phone")}}
+            <button class="btn btn-primary" type="submit" name="submit">Create Customer</button>
+        </form>
+    </div>
+</div>
 {% endblock %}
 {% block footer %} {% endblock %}
 {% block endjs %} {% endblock %}
