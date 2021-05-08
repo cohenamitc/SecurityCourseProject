@@ -48,7 +48,7 @@
             {{ render_field(form.new_pass, placeholder="New Password") }}
             {{ render_field(form.new_pass_confirm, placeholder="Confirm New Password") }}
             <div class="mb-3">
-                <button class="btn btn-danger" type="submit" name="submit">Change Password</button>
+                <button class="btn btn-danger" type="submit" name="submit" onClick="this.disabled=true;">Change Password</button>
             </div>
         </form>
     </div>
