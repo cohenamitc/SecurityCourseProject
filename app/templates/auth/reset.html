@@ -45,7 +45,7 @@
             {{ form.csrf_token }}
             {{ render_field(form.password, placeholder="New Password") }}
             {{ render_field(form.password_confirm, placeholder="Confirm New Password") }}
-            <button class="btn btn-danger" type="submit" name="submit" onClick="this.disabled=true;">Reset</button>
+            <button class="btn btn-danger" type="submit" name="submit" onClick="this.disabled=true;this.form.submit();">Reset</button>
         </form>
     </div>
 </div>

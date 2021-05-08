@@ -52,7 +52,7 @@
                 </label>
                 <a role="button" href="{{ url_for('auth.forgot') }}">Forgot your password?</a><span class="clearfix"></span>
             </div>
-            <button class="btn btn-primary" type="submit" name="submit" onClick="this.disabled=true;">Sign in</button>
+            <button class="btn btn-primary" type="submit" name="submit" onClick="this.disabled=true;this.form.submit();">Sign in</button>
         </form>
     </div>
 </div>
