@@ -41,8 +41,8 @@
         {% endif %}
         <form class="form" method="POST" action="." accept-charset="UTF-8" role="form">
             {{ form.csrf_token }}
-            {{ render_field(form.current, placeholder="Current Password",
-            autofocus="") }}
+            {{ render_field(form.email, placeholder="Email") }}
+            {{ render_field(form.password, placeholder="Current Password") }}
             {{ render_field(form.new_pass, placeholder="New Password") }}
             {{ render_field(form.new_pass_confirm, placeholder="Confirm New Password") }}
             <div class="mb-3">

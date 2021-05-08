@@ -20,12 +20,14 @@ class LoginForm(Form):
 class SignUpForm(Form):
     email = StringField('Email Address', [Email(), DataRequired(message=REQ_FIELD_MSG)])
     password = PasswordField('Password', [DataRequired(message=REQ_FIELD_MSG)])
-    password_confirm = PasswordField('Confirm Password', [DataRequired(message=REQ_FIELD_MSG)])
+    password_confirm = PasswordField('Confirm Password', [DataRequired(message=REQ_FIELD_MSG), EqualTo('password')])
     name = StringField('Full Name', [DataRequired(message=REQ_FIELD_MSG)])
     company = StringField('Company', [Optional()])
 
 
 class ChangePasswordForm(Form):
-    current = PasswordField('Current Password', [DataRequired(message=REQ_FIELD_MSG)])
+    email = StringField('Email Address', [Email(), DataRequired(message=REQ_FIELD_MSG)])
+    password = PasswordField('Current Password', [DataRequired(message=REQ_FIELD_MSG)])
+    # TODO:insert password complexity validator here
     new_pass = PasswordField('New Password', [DataRequired(message=REQ_FIELD_MSG)])
-    new_pass_confirm = PasswordField('Confirm New Password', [DataRequired(message=REQ_FIELD_MSG)])
+    new_pass_confirm = PasswordField('Confirm New Password', [DataRequired(message=REQ_FIELD_MSG), EqualTo('new_pass')])

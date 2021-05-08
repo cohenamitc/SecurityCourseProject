@@ -3,6 +3,7 @@ from flask import Flask, render_template
 
 # Import SQLAlchemy
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager
 
 # Define the WSGI application object
 app = Flask(__name__)
@@ -13,6 +14,8 @@ app.config.from_object('config')
 # Define the database object which is imported
 # by modules and controllers
 db = SQLAlchemy(app)
+
+
 
 
 # Sample HTTP error handling
@@ -35,6 +38,21 @@ app.register_blueprint(admin_page)
 app.register_blueprint(comm_customers)
 app.register_blueprint(comm_plans)
 app.register_blueprint(comm_sectors)
+
+
+# Login Manager
+from app.auth.models import User
+
+login_manager = LoginManager()
+login_manager.login_view = 'auth.signin'
+login_manager.init_app(app)
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    # since the user_id is just the primary key of our user table, use it in the query for the user
+    return User.query.get(str(user_id))
+
 
 # Build the database:
 # This will create the database file using SQLAlchemy

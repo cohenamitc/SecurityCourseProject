@@ -41,12 +41,31 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('sectors.sectors') }}"><i class="bi bi-box"></i> Sectors</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('auth.signout') }}"><i class="bi bi-box-arrow-right"></i> Sign Out</a>
+                </li>
             </ul>
+            {% if user %}
+            <form class="d-flex">
+                <input class="form-control me-2" type="search" value="{{ user.name }}" aria-label="Search" disabled="1">
+              </form>
+            {% endif %}
         </div>
     </div>
 </nav>
 <br/>
 <div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div>
+            {% for category, message in messages %}
+            <div class="alert alert-primary alert-dismissible fade show" role="alert">
+              <strong>{{ category }}</strong> {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
     {% block content %} {% endblock %}
 </div>
 <div>
