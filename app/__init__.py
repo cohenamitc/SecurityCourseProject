@@ -3,7 +3,7 @@ from flask import Flask, render_template
 
 # Import SQLAlchemy
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager
+from flask_login import LoginManager, current_user
 
 # Define the WSGI application object
 app = Flask(__name__)
@@ -53,6 +53,10 @@ def load_user(user_id):
     # since the user_id is just the primary key of our user table, use it in the query for the user
     return User.query.get(str(user_id))
 
+
+@app.context_processor
+def inject_user():
+    return dict(user=current_user)
 
 # Build the database:
 # This will create the database file using SQLAlchemy

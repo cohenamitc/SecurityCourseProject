@@ -1,7 +1,7 @@
 # Import flask dependencies
 from flask import Blueprint, request, render_template, \
                   flash, g, session, redirect, url_for
-from flask_login import login_user, logout_user, login_required
+from flask_login import login_user, logout_user, login_required, current_user
 
 # Import password / encryption helper tools
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -25,6 +25,9 @@ auth = Blueprint('auth', __name__, url_prefix='/auth')
 # Set the route and accepted methods
 @auth.route('/signin/', methods=['GET', 'POST'])
 def signin():
+    if current_user.is_active:
+        flash('Already logged in', 'info')
+        return redirect(url_for('index.home'))
     # If sign in form is submitted
     form = LoginForm(request.form)
     # Verify the sign in form
@@ -41,6 +44,9 @@ def signin():
 
 @auth.route('/signup/', methods=['GET', 'POST'])
 def signup():
+    if current_user.is_active:
+        flash('Already logged in', 'info')
+        return redirect(url_for('index.home'))
     # If sign in form is submitted
     form = SignUpForm(request.form)
     # Verify the sign in form
@@ -67,6 +73,7 @@ def signup():
         else:
             flash('User already exists!', 'error')
     return render_template("auth/signup.html", form=form)
+
 
 @auth.route('/signout/')
 @login_required

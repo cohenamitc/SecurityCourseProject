@@ -2,9 +2,76 @@
 {% block head %} {% endblock %}
 {% block title %}Customers{% endblock %}
 {% block content %}
-<h1>
-    Our Customers:
-</h1>
+{% macro render_field(field, placeholder=None) %}
+{% if field.errors %}
+<div>
+    {% elif field.flags.error %}
+</div>
+{% else %}
+<div>
+    {% endif %}
+    {% set css_class = 'form-control ' + kwargs.pop('class', '') %}
+    <div class="mb-3">
+        {{ field(class=css_class, placeholder=placeholder, **kwargs) }}
+    </div>
+</div>
+{% endmacro %}
+
+<div>
+    <div>
+        <legend>Search Customer</legend>
+        {% with errors = get_flashed_messages(category_filter=["error"]) %}
+        {% if errors %}
+        <div>
+            {% for error in errors %}
+            {{ error }}<br>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        {% if form.errors %}
+        <div>
+            {% for field, error in form.errors.items() %}
+            {% for e in error %}
+            <div class="alert alert-danger" role="alert">
+              {{ e }}
+            </div>
+            {% endfor %}
+            {% endfor %}
+        </div>
+        {% endif %}
+        <form class="form" method="POST" action="." accept-charset="UTF-8" role="form">
+            {{ form.csrf_token }}
+            {{ render_field(form.name, placeholder="Name")}}
+            <button class="btn btn-primary" type="submit" name="submit">Search</button>
+        </form>
+    </div>
+</div>
+{% if customers %}
+<div>
+    <table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Customer</th>
+      <th scope="col">Joined</th>
+      <th scope="col">Contact</th>
+      <th scope="col">Phone</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for customer in customers %}
+    <tr>
+      <th scope="row">{{ customer.name }}</th>
+      <td>{{ customer.date_created }}</td>
+      <td>{{ customer.contact }}</td>
+      <td>{{ customer.phone }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endif %}
 {% endblock %}
 {% block footer %} {% endblock %}
 {% block endjs %} {% endblock %}

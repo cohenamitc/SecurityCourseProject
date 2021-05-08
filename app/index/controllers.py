@@ -15,6 +15,5 @@ index = Blueprint('index', __name__)
 
 # Set the route and accepted methods
 @index.route('/')
-@login_required
 def home():
     return render_template("index/index.html", user=current_user)
