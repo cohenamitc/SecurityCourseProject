@@ -63,3 +63,19 @@ class History(Base):
 
     def __repr__(self):
         return '<History %r>' % self.id
+
+
+class ResetPassword(Base):
+
+    __tablename__ = 'reset_password'
+
+    userid = db.Column(db.String(40), nullable=False)
+    random_hash = db.Column(db.String(192), nullable=False)
+
+    def __init__(self, userid, random_hash):
+        self.userid = userid
+        self.random_hash = random_hash
+        self.id = str(uuid4())
+
+    def __repr__(self):
+        return '<Reset Password %r>' % self.id
