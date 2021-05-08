@@ -44,7 +44,7 @@
         <form class="form" method="POST" action="." accept-charset="UTF-8" role="form">
             {{ form.csrf_token }}
             {{ render_field(form.name, placeholder="Name")}}
-            <button class="btn btn-primary" type="submit" name="submit" onClick="this.disabled=true;this.form.submit();">Search</button>
+            <button class="btn btn-primary" type="submit" name="submit">Search</button>
         </form>
     </div>
 </div>
