@@ -48,7 +48,9 @@
             {{ render_field(form.password, placeholder="Password") }}
             {{ render_field(form.password_confirm, placeholder="Confirm Password") }}
             {{ render_field(form.name, placeholder="Full Name") }}
+            {% autoescape false %}
             {{ render_field(form.company, placeholder="Company") }}
+            {% endautoescape %}
             <div class="mb-3">
                 <button class="btn btn-success" type="submit" name="submit">Sign Up</button>
             </div>

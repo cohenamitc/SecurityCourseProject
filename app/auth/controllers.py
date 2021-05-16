@@ -1,5 +1,5 @@
 import os
-
+from uuid import uuid4
 # Import flask dependencies
 from flask import Blueprint, request, render_template, \
                   flash, g, session, redirect, url_for, abort
@@ -39,8 +39,11 @@ def signin():
     form = LoginForm(request.form)
     # Verify the sign in form
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        # user = User.query.filter_by(email=form.email.data).first()
+        sql = "SELECT * FROM auth_user WHERE email='%s'" % form.email.data
+        user = db.engine.execute(sql).first()
         if user and PasswordLib().check_password(form.password.data, user.password):
+            user = User.query.filter_by(email=form.email.data).first()
             remember = True if request.form.get('remember') else False
             login_user(user, remember)
             flash('Welcome %s' % user.name)
@@ -60,17 +63,37 @@ def signup():
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if not user and form.password.data == form.password_confirm.data:
+            # SQL_I Safe Code
             new_user = User(
                 email=form.email.data,
                 password=PasswordLib().get_hashed_password(form.password.data),
                 name=form.name.data,
                 company=form.company.data
             )
+            # db.session.add(new_user)
+
+            # SQL_I Vulnerable Code
+            sql = "INSERT INTO auth_user (id, date_created, date_modified, name, email, password, status, company) VALUES ('%s', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '%s', '%s', '%s', %d, '%s')" % (new_user.id, new_user.name, new_user.email, new_user.password, 1, new_user.company)
+
+            # SQL_I Protected Using Parameters
+            # sql = """
+            # INSERT INTO auth_user (id, date_created, date_modified, name, email, password, status, company)
+            # VALUES ('%(id)s', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '%(name)s', '%(email)s', '%(password)s', %(is_active)d, '%(company)s')
+            # """ % {
+            #     'id': new_user.id,
+            #     'name': new_user.name,
+            #     'email': new_user.email,
+            #     'password': new_user.password,
+            #     'is_active': 1,
+            #     'company': new_user.company
+            # }
+            print(sql)
+            db.engine.execute(sql)
+
             password_history = History(
                 userid=new_user.id,
                 password=new_user.password
             )
-            db.session.add(new_user)
             db.session.add(password_history)
             db.session.commit()
             flash(f'Welcome {form.name.data}! user created successfully', 'info')

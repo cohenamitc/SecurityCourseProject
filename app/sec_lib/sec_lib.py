@@ -1,10 +1,13 @@
 class SecLib(object):
     @staticmethod
     def prevent_xss_encoding(to_encode: str) -> str:
-        # TODO: Implement prevent_xss_encoding
-        raise NotImplementedError
-
-    @staticmethod
-    def prevent_sqli_encoding(to_encode: str) -> str:
-        # TODO: Implement prevent_sqli_encoding
-        raise NotImplementedError
+        encoding_dictionary = {
+            "&": "&amp",
+            "<": "&lt",
+            ">": "&gt",
+            "\"": "&quot",
+            "'": "&#x27"
+        }
+        for ch in encoding_dictionary:
+            to_encode = to_encode.replace(ch, encoding_dictionary[ch])
+        return to_encode

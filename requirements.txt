@@ -8,3 +8,4 @@ email_validator
 pymysql
 bcrypt
 sendgrid
+pyodbc

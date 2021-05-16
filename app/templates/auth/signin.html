@@ -2,6 +2,7 @@
 {% block head %} {% endblock %}
 {% block title %}Login{% endblock %}
 {% block content %}
+{% autoescape false %}
 {% macro render_field(field, placeholder=None) %}
 {% if field.errors %}
 <div>
@@ -56,6 +57,7 @@
         </form>
     </div>
 </div>
+{% endautoescape %}
 {% endblock %}
 {% block footer %} {% endblock %}
 {% block endjs %} {% endblock %}

@@ -2,6 +2,7 @@
 {% block head %} {% endblock %}
 {% block title %}Customers{% endblock %}
 {% block content %}
+{% autoescape false %}
 {% macro render_field(field, placeholder=None) %}
 {% if field.errors %}
 <div>
@@ -45,11 +46,12 @@
             {{ form.csrf_token }}
             {{ render_field(form.name, placeholder="Name")}}
             <button class="btn btn-primary" type="submit" name="submit">Search</button>
+
         </form>
     </div>
 </div>
+
 {% if customers %}
-{% autoescape true %}
 <div>
     <table class="table">
   <thead>
@@ -72,8 +74,12 @@
   </tbody>
 </table>
 </div>
-{% endautoescape %}
+{% else %}
+<div><br/><br/>
+    <h3>Enter a customer name to search</h3>
+</div>
 {% endif %}
+{% endautoescape %}
 {% endblock %}
 {% block footer %} {% endblock %}
 {% block endjs %} {% endblock %}
