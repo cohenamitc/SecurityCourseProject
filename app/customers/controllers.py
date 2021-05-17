@@ -25,10 +25,10 @@ def customers():
         # customers_list = Customer.query.filter_by(name=form.name.data).all()
 
         # Vulnerable SQL Query
-        customers_list = db.engine.execute(f"SELECT * FROM customers WHERE name='{form.name.data}'").all()
+        # customers_list = db.engine.execute(f"SELECT * FROM customers WHERE name='{form.name.data}'").all()
 
         # Safe query using parameters
-        # customers_list = db.engine.execute("SELECT * FROM customers WHERE name=?", form.name.data).all()
+        customers_list = db.engine.execute("SELECT * FROM customers WHERE name=?", form.name.data).all()
 
         if customers_list:
             encoded_customers_list = []

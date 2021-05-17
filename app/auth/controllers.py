@@ -20,10 +20,11 @@ from sendgrid.helpers.mail import Mail
 from app.auth.forms import LoginForm, ChangePasswordForm, SignUpForm, ForgotPassword, ResetPasswordForm
 
 # Import module models (i.e. User)
-from app.auth.models import User, History, ResetPassword
+from app.auth.models import User, History, ResetPassword, FailedLogin
 
 # Import PassLib
 from app.password_lib.passwd import PasswordLib
+from app.config_service.config_service import ConfigService
 
 # Define the blueprint: 'auth', set its url prefix: app.url/auth
 auth = Blueprint('auth', __name__, url_prefix='/auth')
@@ -39,15 +40,38 @@ def signin():
     form = LoginForm(request.form)
     # Verify the sign in form
     if form.validate_on_submit():
+        # Original SQL Alchemy method
         # user = User.query.filter_by(email=form.email.data).first()
-        sql = "SELECT * FROM auth_user WHERE email='%s'" % form.email.data
-        user = db.engine.execute(sql).first()
+
+        # Vulnerable SQL query
+        user = db.engine.execute("SELECT * FROM auth_user WHERE email='%s'" % form.email.data).first()
+
+        # Safe SQL query
+        # user = db.engine.execute("SELECT * FROM auth_user WHERE email=?", form.email.data).first()
+
         if user and PasswordLib().check_password(form.password.data, user.password):
-            user = User.query.filter_by(email=form.email.data).first()
+            max_logins = ConfigService().get_password('failed_logins')
+            last_failed = FailedLogin.query.filter_by(userid=user.id).all()
+            if len(last_failed) >= max_logins:
+                flash('Max failed logins exceeded, please contact admin', 'error')
+                return redirect(url_for('index.home'))
+            user = User.query.filter_by(id=user.id).first()
             remember = True if request.form.get('remember') else False
             login_user(user, remember)
             flash('Welcome %s' % user.name)
+            delete_failed_login_records = FailedLogin.__table__.delete().where(FailedLogin.userid == user.id)
+            db.session.execute(delete_failed_login_records)
+            db.session.commit()
             return redirect(url_for('index.home'))
+        if user:
+            max_logins = ConfigService().get_password('failed_logins')
+            last_failed = FailedLogin.query.filter_by(userid=user.id).all()
+            if len(last_failed) >= max_logins:
+                flash('Max failed logins exceeded, please contact admin', 'error')
+                return redirect(url_for('index.home'))
+            f = FailedLogin(userid=user.id)
+            db.session.add(f)
+            db.session.commit()
         flash('Wrong email or password', 'error')
     return render_template("auth/signin.html", form=form)
 
@@ -70,25 +94,22 @@ def signup():
                 name=form.name.data,
                 company=form.company.data
             )
+            # Original SQL Alchemy function
             # db.session.add(new_user)
 
             # SQL_I Vulnerable Code
-            sql = "INSERT INTO auth_user (id, date_created, date_modified, name, email, password, status, company) VALUES ('%s', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '%s', '%s', '%s', %d, '%s')" % (new_user.id, new_user.name, new_user.email, new_user.password, 1, new_user.company)
+            # db.engine.execute(
+            #     "INSERT INTO auth_user (id, date_created, date_modified, name, email, password, status, company)\
+            #      VALUES ('%s', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '%s', '%s', '%s', %d, '%s')"
+            #     % (new_user.id, new_user.name, new_user.email, new_user.password, 1, new_user.company)
+            # )
 
             # SQL_I Protected Using Parameters
-            # sql = """
-            # INSERT INTO auth_user (id, date_created, date_modified, name, email, password, status, company)
-            # VALUES ('%(id)s', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '%(name)s', '%(email)s', '%(password)s', %(is_active)d, '%(company)s')
-            # """ % {
-            #     'id': new_user.id,
-            #     'name': new_user.name,
-            #     'email': new_user.email,
-            #     'password': new_user.password,
-            #     'is_active': 1,
-            #     'company': new_user.company
-            # }
-            print(sql)
-            db.engine.execute(sql)
+            db.engine.execute(
+                "INSERT INTO auth_user (id, date_created, date_modified, name, email, password, status, company)\
+                VALUES (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 1, ?)",
+                new_user.id, new_user.name, new_user.email, new_user.password, new_user.company
+            )
 
             password_history = History(
                 userid=new_user.id,
@@ -121,6 +142,12 @@ def change_password():
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user and PasswordLib().check_password(form.password.data, user.password):
+            password_history_count = ConfigService().get_password('history')
+            passwords = History.query.filter_by(userid=user.id).limit(password_history_count)
+            for password in passwords:
+                if PasswordLib().check_password(form.new_pass.data, password.password):
+                    flash('Password found in near history', 'error')
+                    return redirect(url_for('auth.change_password'))
             new_password_salted = PasswordLib().get_hashed_password(form.new_pass.data)
             user.password = new_password_salted
             password_history = History(
@@ -177,6 +204,12 @@ def reset_password(key):
         if user:
             form = ResetPasswordForm(request.form)
             if form.validate_on_submit():
+                password_history_count = ConfigService().get_password('history')
+                passwords = History.query.filter_by(userid=user.id).limit(password_history_count)
+                for password in passwords:
+                    if PasswordLib().check_password(form.password.data, password.password):
+                        flash('Password found in near history', 'error')
+                        return redirect(url_for('auth.change_password'))
                 hashed_password = PasswordLib().get_hashed_password(form.password.data)
                 user.password = hashed_password
                 history = History(

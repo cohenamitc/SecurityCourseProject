@@ -79,3 +79,17 @@ class ResetPassword(Base):
 
     def __repr__(self):
         return '<Reset Password %r>' % self.id
+
+
+class FailedLogin(Base):
+
+    __tablename__ = 'failed_login'
+
+    userid = db.Column(db.String(40), nullable=False)
+
+    def __init__(self, userid):
+        self.userid = userid
+        self.id = str(uuid4())
+
+    def __repr__(self):
+        return '<Failed Login %r>' % self.id
