@@ -25,25 +25,30 @@ def customers():
         # customers_list = Customer.query.filter_by(name=form.name.data).all()
 
         # Vulnerable SQL Query
-        # customers_list = db.engine.execute(f"SELECT * FROM customers WHERE name='{form.name.data}'").all()
+        customers_list = db.engine.execute(f"SELECT * FROM customers WHERE name='{form.name.data}'").all()
 
         # Safe query using parameters
-        customers_list = db.engine.execute("SELECT * FROM customers WHERE name=?", form.name.data).all()
+        # customers_list = db.engine.execute("SELECT * FROM customers WHERE name=?", form.name.data).all()
 
+        # Vulnerable stored XSS code
         if customers_list:
-            encoded_customers_list = []
-            for customer in customers_list:
-                encoded_customer = Customer(
-                        name=SecLib().prevent_xss_encoding(customer.name),
-                        contact=SecLib().prevent_xss_encoding(customer.contact),
-                        phone=SecLib().prevent_xss_encoding(customer.phone)
-                    )
-                encoded_customer.date_created = customer.date_created
-                encoded_customer.date_modified = customer.date_modified
-                encoded_customers_list.append(
-                    encoded_customer
-                )
-            return render_template("customers/customers.html", customers=encoded_customers_list, form=form)
+            return render_template("customers/customers.html", customers=customers_list, form=form)
+
+        # Stored XSS safe code
+        # if customers_list:
+        #     encoded_customers_list = []
+        #     for customer in customers_list:
+        #         encoded_customer = Customer(
+        #                 name=SecLib().prevent_xss_encoding(customer.name),
+        #                 contact=SecLib().prevent_xss_encoding(customer.contact),
+        #                 phone=SecLib().prevent_xss_encoding(customer.phone)
+        #             )
+        #         encoded_customer.date_created = customer.date_created
+        #         encoded_customer.date_modified = customer.date_modified
+        #         encoded_customers_list.append(
+        #             encoded_customer
+        #         )
+        #     return render_template("customers/customers.html", customers=encoded_customers_list, form=form)
         flash(f'Customer {form.name.data} not found', 'error')
     # else:
     #     customers_list = None

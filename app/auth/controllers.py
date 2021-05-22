@@ -44,10 +44,10 @@ def signin():
         # user = User.query.filter_by(email=form.email.data).first()
 
         # Vulnerable SQL query
-        user = db.engine.execute("SELECT * FROM auth_user WHERE email='%s'" % form.email.data).first()
+        # user = db.engine.execute("SELECT * FROM auth_user WHERE email='%s'" % form.email.data).first()
 
         # Safe SQL query
-        # user = db.engine.execute("SELECT * FROM auth_user WHERE email=?", form.email.data).first()
+        user = db.engine.execute("SELECT * FROM auth_user WHERE email=?", form.email.data).first()
 
         if user and PasswordLib().check_password(form.password.data, user.password):
             max_logins = ConfigService().get_password('failed_logins')
@@ -61,6 +61,8 @@ def signin():
             flash('Welcome %s' % user.name)
             delete_failed_login_records = FailedLogin.__table__.delete().where(FailedLogin.userid == user.id)
             db.session.execute(delete_failed_login_records)
+            delete_reset_records = ResetPassword.__table__.delete().where(ResetPassword.userid == user.id)
+            db.session.execute(delete_reset_records)
             db.session.commit()
             return redirect(url_for('index.home'))
         if user:
@@ -98,18 +100,18 @@ def signup():
             # db.session.add(new_user)
 
             # SQL_I Vulnerable Code
-            # db.engine.execute(
-            #     "INSERT INTO auth_user (id, date_created, date_modified, name, email, password, status, company)\
-            #      VALUES ('%s', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '%s', '%s', '%s', %d, '%s')"
-            #     % (new_user.id, new_user.name, new_user.email, new_user.password, 1, new_user.company)
-            # )
-
-            # SQL_I Protected Using Parameters
             db.engine.execute(
                 "INSERT INTO auth_user (id, date_created, date_modified, name, email, password, status, company)\
-                VALUES (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 1, ?)",
-                new_user.id, new_user.name, new_user.email, new_user.password, new_user.company
+                 VALUES ('%s', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '%s', '%s', '%s', %d, '%s')"
+                % (new_user.id, new_user.name, new_user.email, new_user.password, 1, new_user.company)
             )
+
+            # SQL_I Protected Using Parameters
+            # db.engine.execute(
+            #     "INSERT INTO auth_user (id, date_created, date_modified, name, email, password, status, company)\
+            #     VALUES (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 1, ?)",
+            #     new_user.id, new_user.name, new_user.email, new_user.password, new_user.company
+            # )
 
             password_history = History(
                 userid=new_user.id,
@@ -209,7 +211,7 @@ def reset_password(key):
                 for password in passwords:
                     if PasswordLib().check_password(form.password.data, password.password):
                         flash('Password found in near history', 'error')
-                        return redirect(url_for('auth.change_password'))
+                        return redirect(url_for('auth.reset_password', key=key))
                 hashed_password = PasswordLib().get_hashed_password(form.password.data)
                 user.password = hashed_password
                 history = History(
