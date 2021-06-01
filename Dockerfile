@@ -1,11 +1,5 @@
 FROM tiangolo/uwsgi-nginx-flask:python3.6
 
-RUN mkdir /code
-WORKDIR /code
-ADD requirements.txt /code/
-RUN pip install -r requirements.txt --no-cache-dir
-ADD . /code/
-
 # ssh
 ENV SSH_PASSWD "root:Docker!"
 RUN apt-get update \
@@ -13,7 +7,14 @@ RUN apt-get update \
         && apt-get update \
 	&& apt-get install -y --no-install-recommends openssh-server \
 	&& apt-get install -y --no-install-recommends openssl \
+    && apt install unixodbc-dev -y \
 	&& echo "$SSH_PASSWD" | chpasswd
+
+RUN mkdir /code
+WORKDIR /code
+ADD requirements.txt /code/
+RUN pip install -r requirements.txt --no-cache-dir
+ADD . /code/
 
 COPY sshd_config /etc/ssh/
 COPY init.sh /usr/local/bin/
